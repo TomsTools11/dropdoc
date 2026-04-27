@@ -29,24 +29,22 @@
     monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --surface-0: #0a0e14;
-    --surface-1: #10151d;
-    --surface-2: #1a2029;
-    --surface-border: #1f2732;
-    --surface-border-strong: #2e3a4a;
+[data-theme="dark"] {
+  --surface-0: #0a0e14;
+  --surface-1: #10151d;
+  --surface-2: #1a2029;
+  --surface-border: #1f2732;
+  --surface-border-strong: #2e3a4a;
 
-    --text-primary: #fafafa;
-    --text-secondary: #a1a8b3;
-    --text-tertiary: #5a6472;
+  --text-primary: #fafafa;
+  --text-secondary: #a1a8b3;
+  --text-tertiary: #5a6472;
 
-    --brand: #2e9df1;
-    --brand-hover: #5ab3f5;
-    --brand-soft: rgba(46, 157, 241, 0.14);
-    --brand-ring: rgba(46, 157, 241, 0.28);
-    --brand-deep: #6fc5da;
-  }
+  --brand: #2e9df1;
+  --brand-hover: #5ab3f5;
+  --brand-soft: rgba(46, 157, 241, 0.14);
+  --brand-ring: rgba(46, 157, 241, 0.28);
+  --brand-deep: #6fc5da;
 }
 
 @theme inline {
@@ -91,7 +89,8 @@ a {
 /* ============================================================
    V1 — Quiet utility. Landing page styles.
    Ported from design-handoff-dropdoc-landing/V1Landing.css + dark.css.
-   Dark mode keys on prefers-color-scheme instead of .dd-dark.
+   Dark mode keys on [data-theme="dark"] (set by inline script in layout.tsx
+   from localStorage or prefers-color-scheme).
    ============================================================ */
 
 .v1-root {
@@ -141,6 +140,31 @@ a {
   border-left: 1px solid var(--surface-border);
 }
 
+/* Theme toggle — sits at the right end of the nav */
+.v1-theme-toggle {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: color 180ms, background 180ms, border-color 180ms;
+  margin-left: 4px;
+}
+.v1-theme-toggle:hover {
+  color: var(--brand);
+  background: var(--surface-1);
+  border-color: var(--surface-border);
+}
+.v1-theme-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--brand-ring);
+}
+
 /* Brand swap — light and dark both use stacked PNG lockups */
 .v1-brand-swap {
   display: inline-flex;
@@ -157,13 +181,11 @@ a {
 .v1-brand-dark {
   display: none;
 }
-@media (prefers-color-scheme: dark) {
-  .v1-brand-light {
-    display: none;
-  }
-  .v1-brand-dark {
-    display: block;
-  }
+[data-theme="dark"] .v1-brand-light {
+  display: none;
+}
+[data-theme="dark"] .v1-brand-dark {
+  display: block;
 }
 
 /* Hero */
@@ -206,6 +228,66 @@ a {
   font-weight: 300;
 }
 
+/* Stage — wraps dropzone + reports list. Single column when empty, two columns when populated. */
+.v1-stage {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 8px 32px 0;
+}
+.v1-stage--with-reports {
+  max-width: 1200px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+.v1-stage--with-reports .v1-dz-wrap,
+.v1-stage--with-reports .v1-stage-reports {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+.v1-stage--with-reports .v1-section-head--row {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.v1-stage--with-reports .v1-section-head--row .v1-section-title {
+  font-size: 24px;
+}
+.v1-stage--with-reports .v1-search input {
+  width: 100%;
+}
+@media (max-width: 1024px) {
+  .v1-stage--with-reports {
+    grid-template-columns: 1fr;
+    max-width: 900px;
+    gap: 24px;
+  }
+  .v1-stage--with-reports .v1-section-head--row {
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+  .v1-stage--with-reports .v1-section-head--row .v1-section-title {
+    font-size: 28px;
+  }
+  .v1-stage--with-reports .v1-search input {
+    width: 240px;
+  }
+}
+@media (max-width: 640px) {
+  .v1-stage--with-reports .v1-section-head--row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .v1-stage--with-reports .v1-search input {
+    width: 100%;
+  }
+}
+
 /* Dropzone */
 .v1-dz-wrap {
   max-width: 900px;
@@ -228,10 +310,8 @@ a {
   background: var(--brand-soft);
   border-color: var(--brand);
 }
-@media (prefers-color-scheme: dark) {
-  .v1-dz.dragging {
-    background: rgba(46, 157, 241, 0.1);
-  }
+[data-theme="dark"] .v1-dz.dragging {
+  background: rgba(46, 157, 241, 0.1);
 }
 .v1-dz-hatch {
   position: absolute;
@@ -247,17 +327,15 @@ a {
   );
   background-size: 22px 22px;
 }
-@media (prefers-color-scheme: dark) {
-  .v1-dz-hatch {
-    background-image: linear-gradient(
-      135deg,
-      transparent 49.5%,
-      var(--surface-border-strong) 49.5%,
-      var(--surface-border-strong) 50.5%,
-      transparent 50.5%
-    );
-    opacity: 0.5;
-  }
+[data-theme="dark"] .v1-dz-hatch {
+  background-image: linear-gradient(
+    135deg,
+    transparent 49.5%,
+    var(--surface-border-strong) 49.5%,
+    var(--surface-border-strong) 50.5%,
+    transparent 50.5%
+  );
+  opacity: 0.5;
 }
 .v1-dz-body {
   position: relative;
@@ -275,11 +353,9 @@ a {
   background: var(--surface-0);
   border: 1px solid var(--surface-border);
 }
-@media (prefers-color-scheme: dark) {
-  .v1-dz-chip {
-    background: var(--surface-2);
-    border-color: var(--surface-border);
-  }
+[data-theme="dark"] .v1-dz-chip {
+  background: var(--surface-2);
+  border-color: var(--surface-border);
 }
 .v1-dz:hover .v1-dz-chip {
   border-color: var(--brand);
@@ -338,10 +414,8 @@ a {
   color: #dc2626;
   font-family: var(--font-mono);
 }
-@media (prefers-color-scheme: dark) {
-  .v1-dz-error {
-    color: #fca5a5;
-  }
+[data-theme="dark"] .v1-dz-error {
+  color: #fca5a5;
 }
 
 /* Asset rewrite notices — surfaced after upload to explain what we patched */
@@ -579,11 +653,9 @@ a {
   padding: 3px 8px;
   border-radius: 6px;
 }
-@media (prefers-color-scheme: dark) {
-  .v1-feat code {
-    background: var(--surface-2);
-    color: var(--text-secondary);
-  }
+[data-theme="dark"] .v1-feat code {
+  background: var(--surface-2);
+  color: var(--text-secondary);
 }
 
 /* Steps */
@@ -628,10 +700,8 @@ a {
   border-radius: 4px;
   border: 1px solid var(--surface-border);
 }
-@media (prefers-color-scheme: dark) {
-  .v1-steps p code {
-    background: var(--surface-2);
-  }
+[data-theme="dark"] .v1-steps p code {
+  background: var(--surface-2);
 }
 
 /* Reports preview */
@@ -769,11 +839,9 @@ a {
   color: #dc2626;
   background: #fef2f2;
 }
-@media (prefers-color-scheme: dark) {
-  .v1-btn-del:hover {
-    background: rgba(220, 38, 38, 0.14);
-    color: #fca5a5;
-  }
+[data-theme="dark"] .v1-btn-del:hover {
+  background: rgba(220, 38, 38, 0.14);
+  color: #fca5a5;
 }
 
 /* FAQ */

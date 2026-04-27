@@ -61,11 +61,30 @@ export default function Home() {
   const [reports, setReports] = useState<Report[]>([]);
   const [search, setSearch] = useState("");
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [themeMounted, setThemeMounted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setReports(readSession());
+    const current = (document.documentElement.getAttribute("data-theme") ===
+    "dark"
+      ? "dark"
+      : "light") as "light" | "dark";
+    setTheme(current);
+    setThemeMounted(true);
   }, []);
+
+  const toggleTheme = () => {
+    const next = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+    document.documentElement.setAttribute("data-theme", next);
+    try {
+      localStorage.setItem("dropdoc-theme", next);
+    } catch {
+      /* private mode / quota — non-fatal */
+    }
+  };
 
   const uploadFiles = async (files: FileList | File[]) => {
     setUploading(true);
@@ -181,6 +200,25 @@ export default function Home() {
             <a href="#how">How it works</a>
             <a href="#faq">FAQ</a>
             <span className="v1-count">v1.0 · by s3 labs</span>
+            <button
+              type="button"
+              className="v1-theme-toggle"
+              onClick={toggleTheme}
+              aria-label={
+                theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+              }
+              suppressHydrationWarning
+            >
+              {themeMounted ? (
+                theme === "dark" ? (
+                  <Ic.sun />
+                ) : (
+                  <Ic.moon />
+                )
+              ) : (
+                <span style={{ width: 16, height: 16, display: "block" }} />
+              )}
+            </button>
           </nav>
         </div>
       </header>
@@ -201,6 +239,12 @@ export default function Home() {
         </p>
       </section>
 
+      {/* Stage — dropzone alone when empty, dropzone + reports side-by-side when populated */}
+      <div
+        className={`v1-stage${
+          reports.length > 0 ? " v1-stage--with-reports" : ""
+        }`}
+      >
       {/* Dropzone */}
       <section className="v1-dz-wrap">
         <div
@@ -307,12 +351,9 @@ export default function Home() {
 
       {/* Reports preview — only shown when the tab has reports */}
       {reports.length > 0 && (
-        <section className="v1-section v1-section--tight">
+        <section className="v1-section v1-section--tight v1-stage-reports">
           <header className="v1-section-head--row">
-            <div>
-              <span className="v1-section-eyebrow">— Your reports</span>
-              <h2 className="v1-section-title">Per-tab list, not per-account.</h2>
-            </div>
+            <span className="v1-section-eyebrow">— Your reports</span>
             <div className="v1-search">
               <Ic.search />
               <input
@@ -397,6 +438,7 @@ export default function Home() {
           )}
         </section>
       )}
+      </div>
 
       {/* Trust meta strip */}
       <section className="v1-strip">
@@ -715,6 +757,42 @@ const Ic = {
     >
       <circle cx="7" cy="7" r="4.5" />
       <path d="M10.5 10.5 L13.5 13.5" />
+    </svg>
+  ),
+  sun: () => (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="8" cy="8" r="3" />
+      <path d="M8 1.5 V3" />
+      <path d="M8 13 V14.5" />
+      <path d="M1.5 8 H3" />
+      <path d="M13 8 H14.5" />
+      <path d="M3.4 3.4 L4.4 4.4" />
+      <path d="M11.6 11.6 L12.6 12.6" />
+      <path d="M3.4 12.6 L4.4 11.6" />
+      <path d="M11.6 4.4 L12.6 3.4" />
+    </svg>
+  ),
+  moon: () => (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M13.5 9.5 A5.5 5.5 0 1 1 6.5 2.5 A4.2 4.2 0 0 0 13.5 9.5 Z" />
     </svg>
   ),
   bolt: () => (
