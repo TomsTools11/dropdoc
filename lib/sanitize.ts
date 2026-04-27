@@ -19,6 +19,9 @@ const ALLOWED_TAGS = [
   "img", "svg", "path", "circle", "rect", "line", "polyline", "polygon", "g", "defs",
   "linearGradient", "radialGradient", "stop", "text", "tspan", "use", "clipPath", "mask",
   "pattern", "symbol", "ellipse",
+  // Canvas — Chart.js, ECharts, custom drawing libs all render here. Empty on its own,
+  // populated at runtime by allowed scripts.
+  "canvas", "video", "audio", "source", "track", "picture",
   // Figures
   "figure", "figcaption",
   // Details
@@ -40,6 +43,12 @@ const ALLOWED_ATTRIBUTES: Record<string, string[]> = {
   "*": ["class", "id", "style", "data-*", "role", "aria-*", "lang", "dir", "title"],
   a: ["href", "target", "rel"],
   img: ["src", "alt", "width", "height", "loading"],
+  canvas: ["width", "height"],
+  video: ["src", "poster", "width", "height", "controls", "autoplay", "loop", "muted", "playsinline", "preload"],
+  audio: ["src", "controls", "autoplay", "loop", "muted", "preload"],
+  source: ["src", "srcset", "type", "media", "sizes"],
+  track: ["src", "kind", "srclang", "label", "default"],
+  picture: [],
   td: ["colspan", "rowspan"],
   th: ["colspan", "rowspan", "scope"],
   col: ["span"],

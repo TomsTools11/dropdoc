@@ -344,6 +344,86 @@ a {
   }
 }
 
+/* Asset rewrite notices — surfaced after upload to explain what we patched */
+.v1-notices {
+  margin: 18px auto 0;
+  max-width: 720px;
+  border: 1px solid var(--surface-border-strong);
+  background: var(--surface-1);
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.v1-notices-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+.v1-notices-dismiss {
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+.v1-notices-dismiss:hover {
+  color: var(--text-primary);
+}
+.v1-notices-file + .v1-notices-file {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--surface-border);
+}
+.v1-notices-filename {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-bottom: 6px;
+}
+.v1-notices-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.v1-notice {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--surface-0);
+  border: 1px solid var(--surface-border);
+}
+.v1-notice strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.v1-notice--rewritten {
+  border-left: 3px solid var(--brand);
+}
+.v1-notice--removed-script,
+.v1-notice--removed-stylesheet {
+  border-left: 3px solid var(--mark-red);
+}
+.v1-notice-from {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+.v1-notice-from code {
+  font-family: var(--font-mono);
+  word-break: break-all;
+}
+
 /* Trust strip */
 .v1-strip {
   max-width: 900px;

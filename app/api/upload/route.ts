@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { nanoid } from "nanoid";
 import { storeReport } from "@/lib/store";
 import { sanitizeReport, extractTitle } from "@/lib/sanitize";
+import { rewriteAssets, type AssetNotice } from "@/lib/rewrite-assets";
 
 const MAX_FILE_SIZE = 1.25 * 1024 * 1024; // 1.25MB
 
@@ -36,8 +37,10 @@ export async function POST(request: NextRequest) {
     }
 
     const rawHtml = await file.text();
-    const sanitizedHtml = sanitizeReport(rawHtml);
-    const title = extractTitle(rawHtml);
+    const { html: rewrittenHtml, notices }: { html: string; notices: AssetNotice[] } =
+      rewriteAssets(rawHtml);
+    const sanitizedHtml = sanitizeReport(rewrittenHtml);
+    const title = extractTitle(rewrittenHtml);
     const slug = nanoid(8);
 
     const meta = await storeReport(slug, sanitizedHtml, title, file.name);
@@ -47,6 +50,7 @@ export async function POST(request: NextRequest) {
       slug: meta.slug,
       title: meta.title,
       url: `/r/${meta.slug}`,
+      notices,
     });
   }
 

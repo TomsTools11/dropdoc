@@ -19,11 +19,12 @@ DropDoc is a single-purpose Next.js 16 (App Router) + React 19 tool for uploadin
 
 ### Upload → serve pipeline
 
-1. `app/page.tsx` — client-only drag-and-drop UI. Posts files as `FormData` to `/api/upload`. Known slugs are persisted in `sessionStorage` under `reports:v1`; there is no server-side user/account model.
-2. `app/api/upload/route.ts` — validates `.htm(l)` extension and the 1.25MB per-file cap (`MAX_FILE_SIZE`), sanitizes the body with `sanitizeReport`, extracts `<title>` for display, mints an 8-char `nanoid` slug, and stores via `storeReport`.
-3. `lib/store.ts` — Vercel Blob wrapper. Two objects per report: `reports/<slug>.html` (sanitized body) and `meta/<slug>.json` (title, filename, timestamp, blob URL). Uses `addRandomSuffix: false` so slugs map 1:1 to blob keys.
-4. `app/r/[slug]/route.ts` — GETs the stored HTML and returns it with a strict CSP (see next section). Cached public for 1h.
-5. `app/api/reports/[slug]/route.ts` — DELETE endpoint; removes both the HTML and metadata blobs.
+1. `app/page.tsx` — client-only drag-and-drop UI. Posts files as `FormData` to `/api/upload`. Known slugs are persisted in `sessionStorage` under `reports:v1`; there is no server-side user/account model. Surfaces per-file `notices` from the upload response when references were rewritten or stripped.
+2. `app/api/upload/route.ts` — validates `.htm(l)` extension and the 1.25MB per-file cap (`MAX_FILE_SIZE`), runs `rewriteAssets` to fix sibling-file references from "Save Page As"–style exports, sanitizes the body with `sanitizeReport`, extracts `<title>` for display, mints an 8-char `nanoid` slug, and stores via `storeReport`. Returns per-file `notices` describing any rewrites or removals.
+3. `lib/rewrite-assets.ts` — pre-sanitization compatibility layer. Maps relative `<script src>` and `<link rel=stylesheet href>` references to known-library CDN URLs (Chart.js, D3, Leaflet, Plotly, Highcharts, ECharts, jQuery, etc.). Unrecognized relative references are stripped, with the basename surfaced to the uploader. Absolute URLs (`http(s):`, `//`, `data:`, `blob:`) pass through. This is a *compatibility* layer, not a *security* layer — the sanitizer + CSP sandbox below are still what enforce safety.
+4. `lib/store.ts` — Vercel Blob wrapper. Two objects per report: `reports/<slug>.html` (sanitized body) and `meta/<slug>.json` (title, filename, timestamp, blob URL). Uses `addRandomSuffix: false` so slugs map 1:1 to blob keys.
+5. `app/r/[slug]/route.ts` — GETs the stored HTML and returns it with a strict CSP (see next section). Cached public for 1h.
+6. `app/api/reports/[slug]/route.ts` — DELETE endpoint; removes both the HTML and metadata blobs.
 
 ### The security boundary: sanitizer + CSP sandbox (both are required)
 

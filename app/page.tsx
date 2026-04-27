@@ -4,12 +4,23 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import { BrandMark } from "./brand-mark";
 
+type AssetNotice =
+  | { kind: "rewritten"; library: string; from: string }
+  | { kind: "removed-script"; from: string }
+  | { kind: "removed-stylesheet"; from: string };
+
 interface UploadResult {
   filename: string;
   slug?: string;
   title?: string;
   url?: string;
   error?: string;
+  notices?: AssetNotice[];
+}
+
+interface UploadNotice {
+  filename: string;
+  notices: AssetNotice[];
 }
 
 interface Report {
@@ -46,6 +57,7 @@ export default function Home() {
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadNotices, setUploadNotices] = useState<UploadNotice[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
   const [search, setSearch] = useState("");
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
@@ -58,6 +70,7 @@ export default function Home() {
   const uploadFiles = async (files: FileList | File[]) => {
     setUploading(true);
     setUploadError(null);
+    setUploadNotices([]);
 
     const formData = new FormData();
     for (const file of Array.from(files)) {
@@ -72,6 +85,13 @@ export default function Home() {
       const firstError = uploaded.find((r) => r.error);
       if (firstError?.error) {
         setUploadError(firstError.error);
+      }
+
+      const noticesByFile: UploadNotice[] = uploaded
+        .filter((r) => r.slug && r.notices && r.notices.length > 0)
+        .map((r) => ({ filename: r.filename, notices: r.notices ?? [] }));
+      if (noticesByFile.length > 0) {
+        setUploadNotices(noticesByFile);
       }
 
       const now = new Date().toISOString();
@@ -234,6 +254,54 @@ export default function Home() {
             close it. Shareable links keep working after that — the list just
             resets.
           </p>
+        )}
+        {uploadNotices.length > 0 && (
+          <div className="v1-notices" role="status">
+            <div className="v1-notices-head">
+              <span>We patched some references so your report renders correctly.</span>
+              <button
+                type="button"
+                className="v1-notices-dismiss"
+                onClick={() => setUploadNotices([])}
+                aria-label="Dismiss notices"
+              >
+                ×
+              </button>
+            </div>
+            {uploadNotices.map((file, fi) => (
+              <div key={fi} className="v1-notices-file">
+                <div className="v1-notices-filename">{file.filename}</div>
+                <ul className="v1-notices-list">
+                  {file.notices.map((n, i) => (
+                    <li key={i} className={`v1-notice v1-notice--${n.kind}`}>
+                      {n.kind === "rewritten" ? (
+                        <>
+                          <strong>Loaded {n.library} from CDN</strong>
+                          <span className="v1-notice-from">
+                            was: <code>{n.from}</code>
+                          </span>
+                        </>
+                      ) : n.kind === "removed-script" ? (
+                        <>
+                          <strong>Removed unresolvable script</strong>
+                          <span className="v1-notice-from">
+                            <code>{n.from}</code>
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <strong>Removed unresolvable stylesheet</strong>
+                          <span className="v1-notice-from">
+                            <code>{n.from}</code>
+                          </span>
+                        </>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         )}
       </section>
 
