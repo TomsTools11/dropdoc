@@ -381,21 +381,22 @@ export default function Home() {
             <div className="v1-reports">
               {filtered.map((r) => (
                 <div key={r.slug} className="v1-report-row">
-                  <div className="v1-report-dot">
-                    <Ic.check />
-                  </div>
-                  <div className="v1-report-main">
+                  <div className="v1-report-top">
+                    <div className="v1-report-dot">
+                      <Ic.check />
+                    </div>
                     <div className="v1-report-title">{r.title}</div>
+                  </div>
+                  <div className="v1-report-bottom">
                     <div className="v1-report-meta">
                       <span>/r/{r.slug}</span>
                       <span className="dot">·</span>
                       <span>{r.filename}</span>
                     </div>
-                  </div>
-                  <div className="v1-report-when">
-                    {formatDate(r.uploadedAt)}
-                  </div>
-                  <div className="v1-report-actions">
+                    <div className="v1-report-when">
+                      {formatDate(r.uploadedAt)}
+                    </div>
+                    <div className="v1-report-actions">
                     <button
                       className={`v1-btn-ghost ${
                         copiedSlug === r.slug ? "copied" : ""
@@ -431,6 +432,7 @@ export default function Home() {
                     >
                       <Ic.trash />
                     </button>
+                    </div>
                   </div>
                 </div>
               ))}
