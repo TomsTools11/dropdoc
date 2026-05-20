@@ -104,15 +104,22 @@ export function sanitizeReport(html: string): string {
     allowedAttributes: ALLOWED_ATTRIBUTES,
     allowedSchemes: ["http", "https", "data", "mailto"],
     allowVulnerableTags: true, // needed for <style> support
-    allowedStyles: {
-      "*": {
-        // Allow all CSS properties (they're safe — only JS in CSS is dangerous, and CSP blocks that)
-        "/.*/": [/.*/],
-      },
-    },
+    // No `allowedStyles` — sanitize-html's `allowedStyles` keys are literal property names, not
+    // regex patterns, so `{ "/.*/": [/.*/] }` matches nothing and strips every inline `style=`.
+    // Reports we host depend heavily on inline styles (per-element backgrounds, grids, colors).
+    // CSS-borne threats are handled by the report response's CSP sandbox + null origin: scripts
+    // can't reach app-origin state, `javascript:` URLs in CSS are blocked by modern browsers, and
+    // legacy IE `expression()` is long dead. So pass styles through verbatim.
     transformTags: {
       a: (tagName, attribs) => {
-        // Ensure external links open in new tab and are safe
+        // In-page anchors (`#section`) must stay in the same document — forcing `_blank` opens a
+        // new tab every time the user clicks a sidebar link. Only off-document links get the
+        // new-tab + noopener treatment.
+        const href = attribs.href ?? "";
+        const isInPage = href.startsWith("#");
+        if (isInPage) {
+          return { tagName, attribs };
+        }
         return {
           tagName,
           attribs: {
