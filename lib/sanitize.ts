@@ -32,6 +32,13 @@ const ALLOWED_TAGS = [
   "button", "datalist", "output", "progress", "meter",
   // Other
   "address", "time", "wbr",
+  // <template> — inert by spec: contents are parsed into a DocumentFragment but not rendered or
+  // executed until cloned into the active document. Common pattern for client-routed reports that
+  // ship multiple views in one HTML file (e.g. `getElementById('tpl-step').content.cloneNode`).
+  // Stripping the wrapper leaves the children to render directly in <body>, which both breaks the
+  // visual layout and makes `getElementById` lookups return null. Safe alongside the existing CSP
+  // sandbox — scripts inside template content are not executed on parse.
+  "template",
   // Scripts — safe here because the report is served with `Content-Security-Policy: sandbox
   // allow-scripts allow-popups`, which forces the document into an opaque/null origin. Inline
   // and external JS can run, but cannot read app-origin cookies, localStorage, or same-origin
